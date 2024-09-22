@@ -5,9 +5,8 @@ ifndef CURDIR
 endif
 
 CC=g++
-CFLAGS=-ggdb -std=c++17 -I $(CURDIR)/glad/include
+CFLAGS=-ggdb -std=c++17 -idirafter $(CURDIR)/glad/include -D DATA_DIR="../demo_data" -Wno-macro-redefined
 LIBS=-lm -lglfw
-
 
 # Do I really need all this? No. Do I want it anyway? Hell yeah. 
 ifeq ($(OS),Windows_NT)
@@ -95,4 +94,5 @@ clean:
 	rm -rf $(OBJ_DIR)/*.o $(BUILD_DIR)/engine
 
 run: all
-	./$(BUILD_DIR)/engine
+	./$(BUILD_DIR)/engine $(CURDIR)/demo_data
+
