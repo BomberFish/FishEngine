@@ -2,49 +2,13 @@
 
 #include "../RenderScene.hpp"
 
-const char *vertexShaderSource = R"(
-// GLSL Vertex Shader
-#version 330 core
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 color;
-out vec3 vertexColor;
-void main()
-{
-    // gl_Position is a built-int GLSL output variable. The value
-    // we store here will be used by OpenGL to position the vertex.
-    gl_Position = vec4(position, 1.0);
-
-    // Just copy the vertex attribute color to our output variable
-    // vertexColor, so it's "propagated" down the pipeline until reaching
-    // the fragment shader.
-    vertexColor = color;
-} 
-)";
-const char *fragmentShaderSource = R"(
-// GLSL Fragment Shader
-#version 330 core
-out vec4 fragColor;
-in vec3 vertexColor;
-
-void main()
-{
-    fragColor = vec4(vertexColor, 1.0f);
-} 
-)";
-
-void processShaderReturnValue(int success, unsigned int shader, const char* type) {
-	if(!success) {
-		char infoLog[512];
-		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		dialog::show(infoLog, type);
-	}
-}
+using namespace Util;
 
 class TriangleScene : public RenderScene {
 public:
-    TriangleScene() {
-        name = "triangle";
-    }
+	TriangleScene() : shader("triangle") {
+		name = "triangle";
+	}
 
     void render() override {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -76,39 +40,7 @@ public:
 
 		glBindVertexArray(0); // Unbind VAO after setting vertex attributes
 
-		unsigned int vertexShader;
-		vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-		glCompileShader(vertexShader);
-
-		int  success;;
-		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-		processShaderReturnValue(success, vertexShader, "Vertex Shader Compilation Failed!");
-
-		unsigned int fragmentShader;
-		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-		glCompileShader(fragmentShader);
-
-		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-		processShaderReturnValue(success, fragmentShader, "Fragment Shader Compilation Failed!");
-
-		unsigned int shaderProgram;
-		shaderProgram = glCreateProgram();
-
-		glAttachShader(shaderProgram, vertexShader);
-		glAttachShader(shaderProgram, fragmentShader);
-		glLinkProgram(shaderProgram);
-
-		glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-		processShaderReturnValue(success, shaderProgram, "Shader Program Linking Failed!");
-
-		glUseProgram(shaderProgram);
-
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);
+		this->shader.use();
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -118,4 +50,6 @@ public:
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
     }
+private:
+	Shader shader;
 };

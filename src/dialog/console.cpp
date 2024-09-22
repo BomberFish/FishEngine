@@ -46,8 +46,8 @@ Selection show(const char* message, const char* title, Style style, Buttons butt
 	case Buttons::YesNo:
 		printf("[Yes] [No]\n");
 		break;
-	case Buttons::YesNoCancel:
-		printf("[Yes] [No] [Cancel]\n");
+	case Buttons::Quit:
+		printf("[Quit]\n");
 		break;
 	default:
 		printf("[OK]\n");
@@ -72,6 +72,10 @@ Selection show(const char* message, const char* title, Style style, Buttons butt
 	else if (strcmp(input, "No") == 0)
 	{
 		return Selection::No;
+	}
+	else if (strcmp(input, "Quit") == 0)
+	{
+		return Selection::Quit;
 	}
 	else
 	{
