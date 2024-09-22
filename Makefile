@@ -35,12 +35,19 @@ else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
         CFLAGS += -D LINUX `pkg-config --cflags gtk+-3.0`
-		LIBS += -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lXxf86vm -lXinerama -lXcursor `pkg-config --libs gtk+-3.0`
+		LIBS += -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lXxf86vm -lXinerama -lXcursor `pkg-config --libs gtk+-3.0`  `pkg-config --cflags --libs openal`
     endif
     ifeq ($(UNAME_S),Darwin)
-		# Apple is extremely retarded so we have to do a few workarounds for OGL
-        CFLAGS += -D APPLE -D GL_SILENCE_DEPRECATION -ObjC++
-		LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
+		# Apple is extremely retarded so we have to do a few tricks
+
+		# Pretty normal declarations, just define APPLE and enable building ObjC++ for Boxer
+        CFLAGS += -D APPLE -ObjC++
+
+		# This is where the real retardation starts. Including OpenGL/AL absolutely floods your compiler output with deprecation warnings making it impossible to find errors.
+		CFLAGS += -D GL_SILENCE_DEPRECATION -Wno-deprecated-declarations
+
+		# And of course, Apple has their own obtuse way of linking libraries
+		LIBS += -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -framework OpenAL
     endif
     UNAME_P := $(shell uname -m)
     ifeq ($(UNAME_P),x86_64)
@@ -53,6 +60,7 @@ else
         CFLAGS += -D ARM
     endif
 endif
+
 
 SRC_DIR=src
 OBJ_DIR=build/obj

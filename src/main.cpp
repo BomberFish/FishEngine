@@ -12,6 +12,7 @@ namespace Common
 	float CurrentTime;
 	RenderScene *CurrentScene;
 	FileSystem *FS;
+	AudioManager *Audio;
 }
 
 using namespace Common;
@@ -33,7 +34,7 @@ int main(int argc, char** argv) {
 
     /* Initialize the library */
     if (!glfwInit()) {
-		printf("Could not initialize GLFW!\n");
+		fprintf(stderr, "Could not initialize GLFW!\n");
 		dialog::show("Could not initialize GLFW!", "Critical Error");
         return -1;
 	}
@@ -48,7 +49,7 @@ int main(int argc, char** argv) {
     MainWindow = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Main Window", NULL, NULL);
 	
     if (!MainWindow) {
-		printf("Failed to create a window!\n");
+		fprintf(stderr, "Failed to create a window!\n");
 		dialog::show("Failed to create a window!", "GLFW Error");
         glfwTerminate();
         return -1;
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     glfwMakeContextCurrent(MainWindow);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		printf("Could not initialize GLAD!\n");
+		fprintf(stderr, "Could not initialize GLAD!\n");
 		dialog::show("Could not initialize GLAD!", "Critical Error");
 		return -1;
 	}   
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
 
 	printf("OpenGL %s\n", glGetString(GL_VERSION));
 
-
+	glfwSetKeyCallback(MainWindow, key_callback);
 	glfwSetFramebufferSizeCallback(MainWindow, framebuffer_size_callback);  
 	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
@@ -75,7 +76,17 @@ int main(int argc, char** argv) {
 	} catch (std::exception &e) {
 		std::string msg = "Could not initialize file system: ";
 		msg += e.what();
-		printf("%s\n", msg.c_str());
+		fprintf(stderr, "%s\n", msg.c_str());
+		dialog::show(msg.c_str(), "Critical Error");
+		return -1;
+	}
+
+	try {
+		Audio = new AudioManager();
+	} catch (std::exception &e) {
+		std::string msg = "Could not initialize audio manager: ";
+		msg += e.what();
+		fprintf(stderr, "%s\n", msg.c_str());
 		dialog::show(msg.c_str(), "Critical Error");
 		return -1;
 	}
@@ -83,9 +94,10 @@ int main(int argc, char** argv) {
 	TriangleScene triangle;
 	CurrentScene = &triangle;
 
+	Audio->playSound("gamecube.wav");
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(MainWindow)) {
-		processInput();
         /* Render here */
 		glClearColor(0.066f, 0.066f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -101,6 +113,7 @@ int main(int argc, char** argv) {
         glfwPollEvents();
     }
 	printf("Goodbye!\n");
+	delete Audio;
     glfwTerminate();
     return 0;
 }

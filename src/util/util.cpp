@@ -11,6 +11,7 @@ namespace Util {
 			char infoLog[512];
 			glGetShaderInfoLog(shader, 512, NULL, infoLog);
 			dialog::show(infoLog, type);
+			fprintf(stderr, "%s\n", infoLog);
 		}
 	}
 }
@@ -56,6 +57,7 @@ Shader::Shader(std::string name)
 		msg += ": ";
 		msg += e.what();
         dialog::show(msg.c_str(), "Shader Error");
+		fprintf(stderr, "%s\n", msg.c_str());
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
