@@ -17,8 +17,8 @@ namespace Util {
 }
 
 
-Shader::Shader(std::string name)
-{
+Shader::Shader(std::string name) {
+	printf("Loading shader: %s\n", name.c_str());
 	std::string vertexPathStr = Common::FS->GetShaderPath(name + ".vsh");
 	std::string fragmentPathStr = Common::FS->GetShaderPath(name + ".fsh");
 	const char* vertexPath = vertexPathStr.c_str();

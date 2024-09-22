@@ -1,7 +1,8 @@
 #include "common.hpp"
 #include "util/util.hpp"
-#include "input/input.hpp"
-#include "scene/triangle/TriangleScene.hpp"
+#include "input/Input.hpp"
+
+#include "scene/Scenes.hpp"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
