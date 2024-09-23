@@ -1,16 +1,13 @@
 #pragma once
 
 #include "../RenderScene.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 using namespace Util;
 
 class RotatingTriangleScene : public RenderScene {
 public:
 	RotatingTriangleScene() : shader("triangle_rot") {
-		name = "triangle";
+		name = "rot_triangle";
 
 
 		float vertices[] = {
@@ -46,7 +43,6 @@ public:
 
     void render() override {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
 
 		// create transformations
         glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first

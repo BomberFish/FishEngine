@@ -9,10 +9,10 @@ using namespace Util;
 
 using namespace Common;
 
-class ContainerScene : public RenderScene {
+class RotatingContainerScene : public RenderScene {
 public:
-	ContainerScene() : shader("container") {
-		name = "container";
+	RotatingContainerScene() : shader("container_rot") {
+		name = "rot_cont";
 
 		float vertices[] = {
 			// positions          // colors           // texture coords
@@ -72,7 +72,7 @@ public:
 		stbi_image_free(data);
 	}
 
-	~ContainerScene() {
+	~RotatingContainerScene() {
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &EBO);
@@ -84,8 +84,14 @@ public:
         // bind Texture
         glBindTexture(GL_TEXTURE_2D, texture);
 
-        // render container
-        shader.use();
+        // create transformations
+        glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
+
+		this->shader.use();
+		unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }

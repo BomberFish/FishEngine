@@ -5,7 +5,7 @@ ifndef CURDIR
 endif
 
 CC=g++
-CFLAGS=-ggdb -std=c++17 -idirafter $(CURDIR)/glad/include -D DATA_DIR="../demo_data" -Wno-macro-redefined
+CFLAGS=-ggdb -std=c++23 -idirafter $(CURDIR)/glad/include -D DATA_DIR="../demo_data" -Wno-macro-redefined
 LIBS=-lm -lglfw
 
 # Do I really need all this? No. Do I want it anyway? Hell yeah. 
@@ -99,7 +99,7 @@ $(OBJ_DIR)/%.o: glad/src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR)/*.o $(BUILD_DIR)/engine
+	rm -rf $(BUILD_DIR)
 
 run: all
 	./$(BUILD_DIR)/engine $(CURDIR)/demo_data

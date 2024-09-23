@@ -1,11 +1,12 @@
 #include "common.hpp"
-#include "util/util.hpp"
+#include "util/Util.hpp"
 #include "input/Input.hpp"
 
 #include "scene/Scenes.hpp"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
+
 
 namespace Common
 {
@@ -14,6 +15,11 @@ namespace Common
 	RenderScene *CurrentScene;
 	FileSystem *FS;
 	AudioManager *Audio;
+
+	glm::vec2 screenResolution = glm::vec2(WIN_WIDTH, WIN_HEIGHT);
+
+	bool wireframe = false;
+
 }
 
 using namespace Common;
@@ -32,6 +38,28 @@ int main(int argc, char** argv) {
 
 		dataDir = argv[1];
 	}
+
+	try {
+		FS = new FileSystem(dataDir);
+	} catch (std::exception &e) {
+		std::string msg = "Could not initialize file system: ";
+		msg += e.what();
+		fprintf(stderr, "%s\n", msg.c_str());
+		dialog::show(msg.c_str(), "Critical Error");
+		return -1;
+	}
+
+	try {
+		Audio = new AudioManager();
+	} catch (std::exception &e) {
+		std::string msg = "Could not initialize audio manager: ";
+		msg += e.what();
+		fprintf(stderr, "%s\n", msg.c_str());
+		dialog::show(msg.c_str(), "Critical Error");
+		return -1;
+	}
+	
+	Audio->playSound("gamecube.wav");
 
     /* Initialize the library */
     if (!glfwInit()) {
@@ -65,6 +93,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}   
 	
+	glEnable(GL_DEPTH_TEST);
 
 	printf("OpenGL %s\n", glGetString(GL_VERSION));
 
@@ -72,40 +101,39 @@ int main(int argc, char** argv) {
 	glfwSetFramebufferSizeCallback(MainWindow, framebuffer_size_callback);  
 	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
-	try {
-		FS = new FileSystem(dataDir);
-	} catch (std::exception &e) {
-		std::string msg = "Could not initialize file system: ";
-		msg += e.what();
-		fprintf(stderr, "%s\n", msg.c_str());
-		dialog::show(msg.c_str(), "Critical Error");
-		return -1;
-	}
-
-	try {
-		Audio = new AudioManager();
-	} catch (std::exception &e) {
-		std::string msg = "Could not initialize audio manager: ";
-		msg += e.what();
-		fprintf(stderr, "%s\n", msg.c_str());
-		dialog::show(msg.c_str(), "Critical Error");
-		return -1;
-	}
-
 	TriangleScene triangle;
 	CurrentScene = &triangle;
 
-	Audio->playSound("gamecube.wav");
+	double previousTime = glfwGetTime();
+	int frameCount = 0;
 
+
+	glClearColor(0.066f, 0.066f, 0.1f, 1.0f);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(MainWindow)) {
         /* Render here */
-		glClearColor(0.066f, 0.066f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		CurrentTime = glfwGetTime();
 
-		CurrentScene->render();
+		double delta = CurrentTime - previousTime;
+		frameCount++;
+		// If a second has passed. 	
+		if ( delta >= 1.0 )
+		{
+			double fps = double(frameCount) / delta;
+			std::stringstream ss;
+         	ss << "FishEngine" << " [" << fps << " FPS]";
+			// Display the frame count here any way you want.
+			glfwSetWindowTitle(MainWindow, ss.str().c_str());
+
+			frameCount = 0;
+			previousTime = CurrentTime;
+		}
+
+		if (CurrentScene != nullptr) {
+			CurrentScene->render();
+		}
 
         /* Swap front and back buffers */
         glfwSwapBuffers(MainWindow);
